@@ -139,7 +139,7 @@ MODEL_TYPE_DIRS = {
 }
 
 # List of URLs to process
-URLS = ["https://civitai.com/models/1668954/minimal-mix-or-illustrious-or-mexes?modelVersionId=1889067","https://civitai.com/models/1668786/impellitterispell?modelVersionId=1888875","https://civitai.com/models/1611971/mklan-pony?modelVersionId=1888440"]
+URLS = ["https://civitai.com/models/1665089/chrismix-toon-illustrious?modelVersionId=1884639","https://civitai.com/models/1616309?modelVersionId=1888044","https://civitai.com/models/1667819/piyokomix?modelVersionId=1887761","https://civitai.com/models/1668345/animax-latum?modelVersionId=1888360","https://civitai.com/models/1668309/pixelnova-space?modelVersionId=1888314","https://civitai.com/models/1666696?modelVersionId=1886274"]
 
 # === LOGGING SETUP ===
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -363,7 +363,7 @@ def download_images(version, target_dir, max_images=3):
     logger.info(f"Downloaded {downloaded_count} images")
     return downloaded_images
 
-def generate_model_html(model, version, target_dir, downloaded_images):
+def generate_model_html(model, version, target_dir, downloaded_images, original_url=None):
     """
     Generate a complete HTML page for the downloaded model
     """
@@ -411,6 +411,17 @@ def generate_model_html(model, version, target_dir, downloaded_images):
             trained_words_html += f"            <code>{word}</code>\n"
         trained_words_html += "        </div>\n"
         trained_words_html += "    </div>\n"
+    
+    # Create original URL section
+    original_url_html = ""
+    if original_url:
+        original_url_html = f"""
+            <div class="info-card">
+                <h3>Original Source</h3>
+                <p><strong>CivitAI URL:</strong></p>
+                <a href="{original_url}" target="_blank" class="civitai-link">{original_url}</a>
+            </div>
+        """
     
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -571,6 +582,25 @@ def generate_model_html(model, version, target_dir, downloaded_images):
             color: #bbb;
         }}
         
+        .civitai-link {{
+            color: #3498db;
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 0.9em;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            display: inline-block;
+            margin-top: 5px;
+            transition: background-color 0.3s ease;
+        }}
+        
+        .civitai-link:hover {{
+            background: #e9ecef;
+            text-decoration: underline;
+        }}
+        
         @media (max-width: 768px) {{
             .model-info {{
                 grid-template-columns: 1fr;
@@ -601,6 +631,8 @@ def generate_model_html(model, version, target_dir, downloaded_images):
                 <p><strong>Version Name:</strong> {version_name}</p>
                 {f'<p><strong>Version Description:</strong> {version_description}</p>' if version_description else ''}
             </div>
+            
+            {original_url_html}
         </div>
         
         <div class="content">
@@ -641,7 +673,7 @@ def generate_model_html(model, version, target_dir, downloaded_images):
     
     return html_content
 
-def download_model(model_id, model, version):
+def download_model(model_id, model, version, original_url=None):
     raw_name = model.get("name", f"Model_{model_id}")
     clean_name = sanitize_filename(raw_name)
     base_name = f"{clean_name}_{model_id}_{version['id']}"
@@ -672,10 +704,10 @@ def download_model(model_id, model, version):
     # Save metadata
     metadata_path = target_dir / f"{base_name}_metadata.json"
     with open(metadata_path, "w", encoding="utf-8") as f:
-        json.dump({"model": model, "version": version}, f, ensure_ascii=False, indent=2)
+        json.dump({"model": model, "version": version, "original_url": original_url}, f, ensure_ascii=False, indent=2)
 
     # Generate and save HTML page for this model
-    html_content = generate_model_html(model, version, target_dir, downloaded_images)
+    html_content = generate_model_html(model, version, target_dir, downloaded_images, original_url)
     html_path = target_dir / f"{base_name}_info.html"
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
@@ -692,7 +724,7 @@ def main():
         if model_id:
             model, version = fetch_model_info(model_id, version_id)
             if model and version:
-                download_model(model_id, model, version)
+                download_model(model_id, model, version, url)
         else:
             logger.warning(f"Invalid URL format: {url}")
 
