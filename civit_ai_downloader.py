@@ -9,51 +9,83 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 # === CONFIGURATION ===
 API_KEY = os.getenv("CIVITAI_API_KEY")
 BASE_MODEL_DIR = Path(r"N:/Models")
 HEADERS = {"Authorization": f"Bearer {API_KEY}" if API_KEY else ""}
 
-# Enhanced model type directory mapping with specific variants
+# Enhanced model type directory mapping based on baseModel field
 MODEL_TYPE_DIRS = {
     # FLUX variants
-    ("checkpoint", "flux_s"): "FLUX/FLUX.1-S/Checkpoint",
-    ("checkpoint merge", "flux_s"): "FLUX/FLUX.1-S/Checkpoint",
-    ("lora", "flux_s"): "FLUX/FLUX.1-S/Lora",
-    ("textualinversion", "flux_s"): "FLUX/FLUX.1-S/Embeddings",
-    ("controlnet", "flux_s"): "FLUX/FLUX.1-S/ControlNet",
+    ("checkpoint", "flux.1 [dev]"): "FLUX/FLUX.1-Dev/Checkpoint",
+    ("checkpoint merge", "flux.1 [dev]"): "FLUX/FLUX.1-Dev/Checkpoint",
+    ("lora", "flux.1 [dev]"): "FLUX/FLUX.1-Dev/Lora",
+    ("textualinversion", "flux.1 [dev]"): "FLUX/FLUX.1-Dev/Embeddings",
+    ("controlnet", "flux.1 [dev]"): "FLUX/FLUX.1-Dev/ControlNet",
     
-    ("checkpoint", "flux_d"): "FLUX/FLUX.1-D/Checkpoint",
-    ("checkpoint merge", "flux_d"): "FLUX/FLUX.1-D/Checkpoint",
-    ("lora", "flux_d"): "FLUX/FLUX.1-D/Lora",
-    ("textualinversion", "flux_d"): "FLUX/FLUX.1-D/Embeddings",
-    ("controlnet", "flux_d"): "FLUX/FLUX.1-D/ControlNet",
+    ("checkpoint", "flux.1 [schnell]"): "FLUX/FLUX.1-Schnell/Checkpoint",
+    ("checkpoint merge", "flux.1 [schnell]"): "FLUX/FLUX.1-Schnell/Checkpoint",
+    ("lora", "flux.1 [schnell]"): "FLUX/FLUX.1-Schnell/Lora",
+    ("textualinversion", "flux.1 [schnell]"): "FLUX/FLUX.1-Schnell/Embeddings",
+    ("controlnet", "flux.1 [schnell]"): "FLUX/FLUX.1-Schnell/ControlNet",
     
-    # Generic FLUX (fallback)
+    # Generic FLUX (fallback for other flux variants)
     ("checkpoint", "flux"): "FLUX/General/Checkpoint",
     ("checkpoint merge", "flux"): "FLUX/General/Checkpoint",
     ("lora", "flux"): "FLUX/General/Lora",
     ("textualinversion", "flux"): "FLUX/General/Embeddings",
     ("controlnet", "flux"): "FLUX/General/ControlNet",
     
+    # Illustrious XL
+    ("checkpoint", "illustrious xl v0.1"): "SDXL/Illustrious/Checkpoint",
+    ("checkpoint merge", "illustrious xl v0.1"): "SDXL/Illustrious/Checkpoint",
+    ("lora", "illustrious xl v0.1"): "SDXL/Illustrious/Lora",
+    ("textualinversion", "illustrious xl v0.1"): "SDXL/Illustrious/Embeddings",
+    ("controlnet", "illustrious xl v0.1"): "SDXL/Illustrious/ControlNet",
+    
+    # Pony Diffusion XL
+    ("checkpoint", "pony"): "SDXL/Pony/Checkpoint",
+    ("checkpoint merge", "pony"): "SDXL/Pony/Checkpoint",
+    ("lora", "pony"): "SDXL/Pony/Lora",
+    ("textualinversion", "pony"): "SDXL/Pony/Embeddings",
+    ("controlnet", "pony"): "SDXL/Pony/ControlNet",
+    
+    # SDXL 1.0
+    ("checkpoint", "sdxl 1.0"): "SDXL/Base/Checkpoint",
+    ("checkpoint merge", "sdxl 1.0"): "SDXL/Base/Checkpoint",
+    ("lora", "sdxl 1.0"): "SDXL/Base/Lora",
+    ("textualinversion", "sdxl 1.0"): "SDXL/Base/Embeddings",
+    ("hypernetwork", "sdxl 1.0"): "SDXL/Base/Hypernetworks",
+    ("controlnet", "sdxl 1.0"): "SDXL/Base/ControlNet",
+    
+    # SDXL Turbo
+    ("checkpoint", "sdxl turbo"): "SDXL/Turbo/Checkpoint",
+    ("checkpoint merge", "sdxl turbo"): "SDXL/Turbo/Checkpoint",
+    ("lora", "sdxl turbo"): "SDXL/Turbo/Lora",
+    
+    # SD 1.5
+    ("checkpoint", "sd 1.5"): "SD15/Checkpoint",
+    ("checkpoint merge", "sd 1.5"): "SD15/Checkpoint",
+    ("lora", "sd 1.5"): "SD15/Lora",
+    ("textualinversion", "sd 1.5"): "SD15/Embeddings",
+    ("hypernetwork", "sd 1.5"): "SD15/Hypernetworks",
+    ("controlnet", "sd 1.5"): "SD15/ControlNet",
+    
+    # SD 2.1
+    ("checkpoint", "sd 2.1"): "SD21/Checkpoint",
+    ("checkpoint merge", "sd 2.1"): "SD21/Checkpoint",
+    ("lora", "sd 2.1"): "SD21/Lora",
+    ("textualinversion", "sd 2.1"): "SD21/Embeddings",
+    ("controlnet", "sd 2.1"): "SD21/ControlNet",
+    
     # Hunyuan variants
-    ("checkpoint", "hunyuan"): "Hunyuan/Hunyuan-1/Checkpoint",
-    ("checkpoint merge", "hunyuan"): "Hunyuan/Hunyuan-1/Checkpoint",
-    ("lora", "hunyuan"): "Hunyuan/Hunyuan-1/Lora",
-    ("textualinversion", "hunyuan"): "Hunyuan/Hunyuan-1/Embeddings",
-    ("controlnet", "hunyuan"): "Hunyuan/Hunyuan-1/ControlNet",
+    ("checkpoint", "hunyuan-dit"): "Hunyuan/Hunyuan-DiT/Checkpoint",
+    ("checkpoint merge", "hunyuan-dit"): "Hunyuan/Hunyuan-DiT/Checkpoint",
+    ("lora", "hunyuan-dit"): "Hunyuan/Hunyuan-DiT/Lora",
     
-    ("checkpoint", "hunyuan_video"): "Hunyuan/Hunyuan-Video/Checkpoint",
-    ("checkpoint merge", "hunyuan_video"): "Hunyuan/Hunyuan-Video/Checkpoint",
-    ("lora", "hunyuan_video"): "Hunyuan/Hunyuan-Video/Lora",
-    
-    # Lumina
-    ("checkpoint", "lumina"): "Lumina/Checkpoint",
-    ("checkpoint merge", "lumina"): "Lumina/Checkpoint",
-    ("lora", "lumina"): "Lumina/Lora",
-    ("textualinversion", "lumina"): "Lumina/Embeddings",
-    ("controlnet", "lumina"): "Lumina/ControlNet",
+    ("checkpoint", "hunyuan video"): "Hunyuan/Hunyuan-Video/Checkpoint",
+    ("checkpoint merge", "hunyuan video"): "Hunyuan/Hunyuan-Video/Checkpoint",
+    ("lora", "hunyuan video"): "Hunyuan/Hunyuan-Video/Lora",
     
     # Kolors
     ("checkpoint", "kolors"): "Kolors/Checkpoint",
@@ -62,74 +94,37 @@ MODEL_TYPE_DIRS = {
     ("textualinversion", "kolors"): "Kolors/Embeddings",
     ("controlnet", "kolors"): "Kolors/ControlNet",
     
+    # Lumina
+    ("checkpoint", "lumina-t2x"): "Lumina/Checkpoint",
+    ("checkpoint merge", "lumina-t2x"): "Lumina/Checkpoint",
+    ("lora", "lumina-t2x"): "Lumina/Lora",
+    
     # Mochi
     ("checkpoint", "mochi"): "Mochi/Checkpoint",
     ("checkpoint merge", "mochi"): "Mochi/Checkpoint",
     ("lora", "mochi"): "Mochi/Lora",
     
     # LTX-Video
-    ("checkpoint", "ltxv"): "LTX-Video/Checkpoint",
-    ("checkpoint merge", "ltxv"): "LTX-Video/Checkpoint",
-    ("lora", "ltxv"): "LTX-Video/Lora",
+    ("checkpoint", "ltx-video"): "LTX-Video/Checkpoint",
+    ("checkpoint merge", "ltx-video"): "LTX-Video/Checkpoint",
+    ("lora", "ltx-video"): "LTX-Video/Lora",
     
-    # CogVideoX
-    ("checkpoint", "cogvideox"): "CogVideoX/Checkpoint",
-    ("checkpoint merge", "cogvideox"): "CogVideoX/Checkpoint",
-    ("lora", "cogvideox"): "CogVideoX/Lora",
+    # CogVideoX variants
+    ("checkpoint", "cogvideox-2b"): "CogVideoX/2B/Checkpoint",
+    ("checkpoint merge", "cogvideox-2b"): "CogVideoX/2B/Checkpoint",
+    ("lora", "cogvideox-2b"): "CogVideoX/2B/Lora",
     
-    # NoobAI
-    ("checkpoint", "noobai"): "NoobAI/Checkpoint",
-    ("checkpoint merge", "noobai"): "NoobAI/Checkpoint",
-    ("lora", "noobai"): "NoobAI/Lora",
-    ("textualinversion", "noobai"): "NoobAI/Embeddings",
-    ("controlnet", "noobai"): "NoobAI/ControlNet",
+    ("checkpoint", "cogvideox-5b"): "CogVideoX/5B/Checkpoint",
+    ("checkpoint merge", "cogvideox-5b"): "CogVideoX/5B/Checkpoint",
+    ("lora", "cogvideox-5b"): "CogVideoX/5B/Lora",
     
-    # Wan Video variants
-    ("checkpoint", "wan_video_1_3b_t2v"): "Wan-Video/1.3B-T2V/Checkpoint",
-    ("checkpoint merge", "wan_video_1_3b_t2v"): "Wan-Video/1.3B-T2V/Checkpoint",
-    ("lora", "wan_video_1_3b_t2v"): "Wan-Video/1.3B-T2V/Lora",
+    # NoobAI variants
+    ("checkpoint", "noobai xl"): "NoobAI/XL/Checkpoint",
+    ("checkpoint merge", "noobai xl"): "NoobAI/XL/Checkpoint",
+    ("lora", "noobai xl"): "NoobAI/XL/Lora",
+    ("textualinversion", "noobai xl"): "NoobAI/XL/Embeddings",
     
-    ("checkpoint", "wan_video_14b_t2v"): "Wan-Video/14B-T2V/Checkpoint",
-    ("checkpoint merge", "wan_video_14b_t2v"): "Wan-Video/14B-T2V/Checkpoint",
-    ("lora", "wan_video_14b_t2v"): "Wan-Video/14B-T2V/Lora",
-    
-    ("checkpoint", "wan_video_14b_i2v_480p"): "Wan-Video/14B-I2V-480p/Checkpoint",
-    ("checkpoint merge", "wan_video_14b_i2v_480p"): "Wan-Video/14B-I2V-480p/Checkpoint",
-    ("lora", "wan_video_14b_i2v_480p"): "Wan-Video/14B-I2V-480p/Lora",
-    
-    ("checkpoint", "wan_video_14b_i2v_720p"): "Wan-Video/14B-I2V-720p/Checkpoint",
-    ("checkpoint merge", "wan_video_14b_i2v_720p"): "Wan-Video/14B-I2V-720p/Checkpoint",
-    ("lora", "wan_video_14b_i2v_720p"): "Wan-Video/14B-I2V-720p/Lora",
-    
-    # SDXL models
-    ("checkpoint", "sdxl"): "SDXL/Checkpoint",
-    ("checkpoint merge", "sdxl"): "SDXL/Checkpoint",
-    ("lora", "sdxl"): "SDXL/Lora",
-    ("textualinversion", "sdxl"): "SDXL/Embeddings",
-    ("hypernetwork", "sdxl"): "SDXL/Hypernetworks",
-    ("controlnet", "sdxl"): "SDXL/ControlNet",
-    
-    # SDXL Illustrious (special case)
-    ("checkpoint", "illustrious"): "SDXL/Illustrious/Checkpoint",
-    ("checkpoint merge", "illustrious"): "SDXL/Illustrious/Checkpoint",
-    ("lora", "illustrious"): "SDXL/Illustrious/Lora",
-    ("textualinversion", "illustrious"): "SDXL/Illustrious/Embeddings",
-    ("controlnet", "illustrious"): "SDXL/Illustrious/ControlNet",
-    
-    # SD 1.5 models
-    ("checkpoint", "sd15"): "SD15/Checkpoint",
-    ("checkpoint merge", "sd15"): "SD15/Checkpoint",
-    ("lora", "sd15"): "SD15/Lora",
-    ("textualinversion", "sd15"): "SD15/Embeddings",
-    ("hypernetwork", "sd15"): "SD15/Hypernetworks",
-    ("controlnet", "sd15"): "SD15/ControlNet",
-    
-    # Pony models
-    ("checkpoint", "pony"): "SDXL/Pony/Checkpoint",
-    ("checkpoint merge", "pony"): "SDXL/Pony/Checkpoint",
-    ("lora", "pony"): "SDXL/Pony/Lora",
-    
-    # Default fallbacks
+    # Default fallbacks for unknown base models
     ("checkpoint", "unknown"): "Other/Checkpoint",
     ("checkpoint merge", "unknown"): "Other/Checkpoint",
     ("lora", "unknown"): "Other/Lora",
@@ -139,7 +134,7 @@ MODEL_TYPE_DIRS = {
 }
 
 # List of URLs to process
-URLS = ["https://civitai.com/models/1665089/chrismix-toon-illustrious?modelVersionId=1884639","https://civitai.com/models/1616309?modelVersionId=1888044","https://civitai.com/models/1667819/piyokomix?modelVersionId=1887761","https://civitai.com/models/1668345/animax-latum?modelVersionId=1888360","https://civitai.com/models/1668309/pixelnova-space?modelVersionId=1888314","https://civitai.com/models/1666696?modelVersionId=1886274"]
+URLS = [""]
 
 # === LOGGING SETUP ===
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -184,141 +179,82 @@ def fetch_model_info(model_id, version_id=None):
         logger.error(f"Error fetching model {model_id} (version {version_id}): {e}")
         return None, None
 
-def detect_model_base(model, version):
+def get_base_model_key(version):
     """
-    Detect the base model type with specific variants from model information
+    Extract and normalize the base model from version info
     """
-    # Check model name and tags for keywords
-    model_name = model.get("name", "").lower()
+    base_model = version.get("baseModel", "").lower().strip()
     
-    # Handle tags that can be either strings or objects
-    model_tags = []
-    for tag in model.get("tags", []):
-        if isinstance(tag, str):
-            model_tags.append(tag.lower())
-        elif isinstance(tag, dict):
-            model_tags.append(tag.get("name", "").lower())
+    if not base_model:
+        logger.warning("No baseModel found in version info")
+        return "unknown"
     
-    version_name = version.get("name", "").lower()
-    description = model.get("description", "").lower()
+    # Normalize common base model names to match our directory structure
+    base_model_mappings = {
+        # FLUX variants
+        "flux.1 [dev]": "flux.1 [dev]",
+        "flux.1 [schnell]": "flux.1 [schnell]", 
+        "flux1dev": "flux.1 [dev]",
+        "flux1schnell": "flux.1 [schnell]",
+        "flux dev": "flux.1 [dev]",
+        "flux schnell": "flux.1 [schnell]",
+        
+        # SDXL variants
+        "sdxl 1.0": "sdxl 1.0",
+        "sdxl": "sdxl 1.0",
+        "sdxl turbo": "sdxl turbo",
+        "illustrious xl v0.1": "illustrious xl v0.1",
+        "illustrious": "illustrious xl v0.1",
+        "pony": "pony",
+        "pony diffusion xl": "pony",
+        
+        # SD variants  
+        "sd 1.5": "sd 1.5",
+        "sd1.5": "sd 1.5",
+        "stable diffusion 1.5": "sd 1.5",
+        "sd 2.1": "sd 2.1",
+        "sd2.1": "sd 2.1",
+        
+        # Other models
+        "hunyuan-dit": "hunyuan-dit",
+        "hunyuan video": "hunyuan video",
+        "kolors": "kolors",
+        "lumina-t2x": "lumina-t2x",
+        "mochi": "mochi",
+        "ltx-video": "ltx-video",
+        "cogvideox-2b": "cogvideox-2b",
+        "cogvideox-5b": "cogvideox-5b",
+        "noobai xl": "noobai xl",
+    }
     
-    # Combine all text sources for analysis
-    all_text = f"{model_name} {version_name} {description} {' '.join(model_tags)}"
+    # Try exact match first
+    if base_model in base_model_mappings:
+        return base_model_mappings[base_model]
     
-    # Check for FLUX variants (more specific first)
-    if any(keyword in all_text for keyword in ["flux.1-s", "flux 1 s", "flux1s", "flux.1 s"]):
-        return "flux_s"
-    elif any(keyword in all_text for keyword in ["flux.1-dev", "flux.1-d", "flux 1 dev", "flux 1 d", "flux1d", "flux.1 dev", "flux.1 d"]):
-        return "flux_d"
-    elif any(keyword in all_text for keyword in ["flux", "flux.1", "flux1"]):
-        return "flux"
+    # Try partial matches for flexibility
+    for key, value in base_model_mappings.items():
+        if key in base_model or base_model in key:
+            logger.info(f"Matched '{base_model}' to '{value}' via partial match")
+            return value
     
-    # Check for Hunyuan variants
-    if any(keyword in all_text for keyword in ["hunyuan video", "hunyuan-video", "hunyuanvideo"]):
-        return "hunyuan_video"
-    elif any(keyword in all_text for keyword in ["hunyuan", "hunyuan-1", "hunyuan 1"]):
-        return "hunyuan"
-    
-    # Check for Wan Video variants (most specific first)
-    if any(keyword in all_text for keyword in ["wan video 14b i2v 720p", "wan-video-14b-i2v-720p", "wanvideo14bi2v720p"]):
-        return "wan_video_14b_i2v_720p"
-    elif any(keyword in all_text for keyword in ["wan video 14b i2v 480p", "wan-video-14b-i2v-480p", "wanvideo14bi2v480p"]):
-        return "wan_video_14b_i2v_480p"
-    elif any(keyword in all_text for keyword in ["wan video 14b t2v", "wan-video-14b-t2v", "wanvideo14bt2v"]):
-        return "wan_video_14b_t2v"
-    elif any(keyword in all_text for keyword in ["wan video 1.3b t2v", "wan-video-1.3b-t2v", "wanvideo1.3bt2v", "wan video 1_3b t2v"]):
-        return "wan_video_1_3b_t2v"
-    
-    # Check for other new models
-    if any(keyword in all_text for keyword in ["lumina", "lumina-t2x"]):
-        return "lumina"
-    
-    if any(keyword in all_text for keyword in ["kolors", "kwai-kolors"]):
-        return "kolors"
-    
-    if any(keyword in all_text for keyword in ["mochi", "mochi-1"]):
-        return "mochi"
-    
-    if any(keyword in all_text for keyword in ["ltx-video", "ltxv", "ltx video", "lightricks"]):
-        return "ltxv"
-    
-    if any(keyword in all_text for keyword in ["cogvideox", "cog-videox", "cog videox"]):
-        return "cogvideox"
-    
-    if any(keyword in all_text for keyword in ["noobai", "noob-ai", "noob ai"]):
-        return "noobai"
-    
-    # Check for Illustrious (specific SDXL variant)
-    if any(keyword in all_text for keyword in ["illustrious", "illust"]):
-        return "illustrious"
-    
-    # Check for Pony (specific SDXL variant)
-    if any(keyword in all_text for keyword in ["pony", "ponyxl", "pony diffusion"]):
-        return "pony"
-    
-    # Check for SDXL
-    if any(keyword in all_text for keyword in ["sdxl", "xl", "stable diffusion xl"]):
-        return "sdxl"
-    
-    # Check for SD 1.5
-    if any(keyword in all_text for keyword in ["sd15", "sd 1.5", "stable diffusion 1.5", "v1-5"]):
-        return "sd15"
-    
-    # Check base model from version info if available
-    base_model = version.get("baseModel", "").lower()
-    if base_model:
-        # Check for specific variants first
-        if "flux" in base_model:
-            if "dev" in base_model or "1-d" in base_model:
-                return "flux_d"
-            elif "schnell" in base_model or "1-s" in base_model:
-                return "flux_s"
-            else:
-                return "flux"
-        elif "hunyuan" in base_model:
-            if "video" in base_model:
-                return "hunyuan_video"
-            else:
-                return "hunyuan"
-        elif "sdxl" in base_model or "xl" in base_model:
-            if "illustrious" in all_text:
-                return "illustrious"
-            elif "pony" in all_text:
-                return "pony"
-            else:
-                return "sdxl"
-        elif "sd 1.5" in base_model or "v1-5" in base_model:
-            return "sd15"
-        elif "lumina" in base_model:
-            return "lumina"
-        elif "kolors" in base_model:
-            return "kolors"
-        elif "mochi" in base_model:
-            return "mochi"
-        elif "ltx" in base_model:
-            return "ltxv"
-        elif "cog" in base_model and "video" in base_model:
-            return "cogvideox"
-        elif "noob" in base_model:
-            return "noobai"
-    
-    logger.warning(f"Could not detect base model for {model_name}, using 'unknown'")
+    logger.warning(f"Unknown base model: '{base_model}', using 'unknown'")
     return "unknown"
 
-def determine_target_dir(model_type, model_base, base_name):
+def determine_target_dir(model_type, base_model_key, base_name):
     """
-    Determine target directory based on model type and detected base model
+    Determine target directory based on model type and base model from API
     """
     model_type_lower = model_type.lower()
     
     # Try to find exact match
-    dir_key = (model_type_lower, model_base)
+    dir_key = (model_type_lower, base_model_key)
     if dir_key in MODEL_TYPE_DIRS:
         subdir = MODEL_TYPE_DIRS[dir_key]
     else:
         # Fallback to unknown base
         fallback_key = (model_type_lower, "unknown")
         subdir = MODEL_TYPE_DIRS.get(fallback_key, "Other/Unknown")
+        logger.warning(f"No specific directory mapping for {dir_key}, using fallback: {subdir}")
     
     target_dir = BASE_MODEL_DIR / subdir / base_name
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -548,6 +484,25 @@ def generate_model_html(model, version, target_dir, downloaded_images, original_
             font-family: 'Courier New', monospace;
         }}
         
+        .civitai-link {{
+            color: #3498db;
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 0.9em;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            display: inline-block;
+            margin-top: 5px;
+            transition: background-color 0.3s ease;
+        }}
+        
+        .civitai-link:hover {{
+            background: #e9ecef;
+            text-decoration: underline;
+        }}
+        
         .modal {{
             display: none;
             position: fixed;
@@ -580,25 +535,6 @@ def generate_model_html(model, version, target_dir, downloaded_images, original_
         
         .close:hover {{
             color: #bbb;
-        }}
-        
-        .civitai-link {{
-            color: #3498db;
-            text-decoration: none;
-            word-break: break-all;
-            font-size: 0.9em;
-            padding: 8px 12px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            border: 1px solid #dee2e6;
-            display: inline-block;
-            margin-top: 5px;
-            transition: background-color 0.3s ease;
-        }}
-        
-        .civitai-link:hover {{
-            background: #e9ecef;
-            text-decoration: underline;
         }}
         
         @media (max-width: 768px) {{
@@ -679,11 +615,11 @@ def download_model(model_id, model, version, original_url=None):
     base_name = f"{clean_name}_{model_id}_{version['id']}"
 
     model_type = model.get("type", "Unknown")
-    model_base = detect_model_base(model, version)
-    target_dir = determine_target_dir(model_type, model_base, base_name)
+    base_model_key = get_base_model_key(version)
+    target_dir = determine_target_dir(model_type, base_model_key, base_name)
 
     logger.info(f"Processing: {raw_name}")
-    logger.info(f"Detected model type: {model_type}, base: {model_base}")
+    logger.info(f"Model type: {model_type}, Base model: {base_model_key}")
 
     # Download model file
     safetensors_file = ""
