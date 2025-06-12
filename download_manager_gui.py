@@ -90,7 +90,10 @@ class GUIDownloadManager:
         Worker function that runs in a separate thread
         """
         try:
-            self.processor = ModelProcessor()
+            self.processor = ModelProcessor(
+                progress_callback=self._update_progress,
+                status_callback=self._update_status
+            )
             
             for i, url in enumerate(urls):
                 if self.should_stop:
@@ -103,11 +106,14 @@ class GUIDownloadManager:
                     self.stats["failed"] += 1
                     continue
                 
+                # Update overall progress (per model: 0-100%)
+                overall_start = (i / self.stats["total"]) * 100
+                overall_range = (1 / self.stats["total"]) * 100
+                
                 # Update current model
                 self.stats["current_model"] = f"Model {model_id}"
-                overall_progress = (i / self.stats["total"]) * 100
                 self._update_progress(
-                    overall_progress,
+                    overall_start,
                     f"Processing {i+1}/{self.stats['total']}: Model {model_id}"
                 )
                 
@@ -118,6 +124,8 @@ class GUIDownloadManager:
                 
                 if result.get("success", False):
                     self.stats["completed"] += 1
+                    final_progress = overall_start + overall_range
+                    self._update_progress(final_progress, f"Completed {self.stats['completed']}/{self.stats['total']}")
                     self._log(f"✓ Successfully downloaded: {result.get('model_name', 'Unknown')}", "SUCCESS")
                 else:
                     self.stats["failed"] += 1
@@ -145,6 +153,8 @@ class GUIDownloadManager:
         try:
             # Fetch model info
             self._update_model_status("Fetching model information...")
+            self._update_progress(5, "Fetching model information...")
+            
             model, version = self.processor.api_client.fetch_model_info(model_id, version_id)
             
             if not model or not version:
@@ -155,6 +165,8 @@ class GUIDownloadManager:
             
             # Setup directories
             self._update_model_status("Preparing directories...")
+            self._update_progress(10, "Preparing directories...")
+            
             from utils import sanitize_filename, get_base_model_key, determine_target_dir
             
             clean_name = sanitize_filename(model_name)
@@ -165,20 +177,43 @@ class GUIDownloadManager:
             
             downloaded_files = {}
             
-            # Download model file
+            # Download model file (main progress: 15-75%)
             self._update_model_status("Downloading model file...")
+            self._update_progress(15, "Downloading model file...")
+            
+            # Create a progress callback for model download
+            def model_progress(percentage, status):
+                # Map model download to 15-75% of total progress
+                adjusted_percentage = 15 + (percentage * 0.6)
+                self._update_progress(adjusted_percentage, status)
+            
+            # Temporarily set the progress callback
+            self.processor.model_downloader.file_downloader.progress_callback = model_progress
+            
             model_filename = self.processor.model_downloader.download_model_file(version, target_dir)
             if model_filename:
                 downloaded_files["model_file"] = model_filename
             
-            # Download images
+            # Download images (75-85%)
             self._update_model_status("Downloading preview images...")
+            self._update_progress(75, "Downloading preview images...")
+            
+            # Create progress callback for images
+            def image_progress(percentage, status):
+                # Map image download to 75-85% of total progress
+                adjusted_percentage = 75 + (percentage * 0.1)
+                self._update_progress(adjusted_percentage, status)
+            
+            self.processor.image_downloader.file_downloader.progress_callback = image_progress
+            
             downloaded_images = self.processor.image_downloader.download_images(version, target_dir)
             if downloaded_images:
                 downloaded_files["images"] = [img.name for img in downloaded_images]
             
-            # Generate documentation
+            # Generate documentation (85-95%)
             self._update_model_status("Generating documentation...")
+            self._update_progress(85, "Generating documentation...")
+            
             html_content = self.processor.html_generator.generate_model_html(
                 model, version, target_dir, downloaded_images, original_url
             )
@@ -186,13 +221,22 @@ class GUIDownloadManager:
             if html_path:
                 downloaded_files["html_info"] = html_path.name
             
-            # Save metadata
+            # Save metadata (95-100%)
             self._update_model_status("Saving metadata...")
+            self._update_progress(95, "Saving metadata...")
+            
             metadata_path = self.processor.metadata_manager.save_metadata(
                 model, version, target_dir, base_name, original_url, downloaded_files
             )
             if metadata_path:
                 downloaded_files["metadata"] = metadata_path.name
+            
+            # Complete
+            self._update_progress(100, f"Completed: {model_name}")
+            
+            # Reset progress callbacks
+            self.processor.model_downloader.file_downloader.progress_callback = None
+            self.processor.image_downloader.file_downloader.progress_callback = None
             
             return {
                 "success": True,
@@ -232,6 +276,8 @@ class GUIDownloadManager:
     def _update_progress(self, percentage, status=""):
         """Update progress bar"""
         if self.progress_callback:
+            # Ensure percentage is within bounds
+            percentage = max(0, min(100, percentage))
             self.progress_callback(percentage, status)
     
     def _update_status(self, status):

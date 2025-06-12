@@ -12,9 +12,10 @@ class FileDownloader:
     Handles downloading files with progress tracking
     """
     
-    def __init__(self):
+    def __init__(self, progress_callback=None):
         self.chunk_size = Config.CHUNK_SIZE
         self.headers = Config.HEADERS
+        self.progress_callback = progress_callback
     
     def download_file(self, url, path, headers=None):
         """
@@ -39,18 +40,27 @@ class FileDownloader:
             with requests.get(url, stream=True, headers=request_headers) as r:
                 r.raise_for_status()
                 total = int(r.headers.get('content-length', 0))
+                downloaded = 0
                 
-                with open(path, 'wb') as f, tqdm(
-                    desc=path.name,
-                    total=total,
-                    unit='B',
-                    unit_scale=True,
-                    unit_divisor=1024,
-                ) as bar:
-                    for chunk in r.iter_content(chunk_size=self.chunk_size):
-                        if chunk:  # filter out keep-alive chunks
-                            size = f.write(chunk)
-                            bar.update(size)
+                with open(path, 'wb') as f:
+                    # Create progress bar for terminal
+                    with tqdm(
+                        desc=path.name,
+                        total=total,
+                        unit='B',
+                        unit_scale=True,
+                        unit_divisor=1024,
+                    ) as bar:
+                        for chunk in r.iter_content(chunk_size=self.chunk_size):
+                            if chunk:  # filter out keep-alive chunks
+                                size = f.write(chunk)
+                                downloaded += size
+                                bar.update(size)
+                                
+                                # Update GUI progress if callback is provided
+                                if self.progress_callback and total > 0:
+                                    percentage = (downloaded / total) * 100
+                                    self.progress_callback(percentage, f"Downloading {path.name}")
             
             logger.info(f"Successfully downloaded: {path.name}")
             return True
@@ -70,8 +80,8 @@ class ImageDownloader:
     Specialized downloader for preview images
     """
     
-    def __init__(self):
-        self.file_downloader = FileDownloader()
+    def __init__(self, progress_callback=None):
+        self.file_downloader = FileDownloader(progress_callback)
     
     def download_images(self, version, target_dir, max_images=None):
         """
@@ -131,8 +141,8 @@ class ModelDownloader:
     Specialized downloader for model files
     """
     
-    def __init__(self):
-        self.file_downloader = FileDownloader()
+    def __init__(self, progress_callback=None):
+        self.file_downloader = FileDownloader(progress_callback)
     
     def download_model_file(self, version, target_dir):
         """

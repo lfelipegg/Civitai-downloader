@@ -13,12 +13,14 @@ class ModelProcessor:
     Main class that orchestrates the model download process
     """
     
-    def __init__(self):
+    def __init__(self, progress_callback=None, status_callback=None):
         self.api_client = CivitAIClient()
-        self.model_downloader = ModelDownloader()
-        self.image_downloader = ImageDownloader()
+        self.model_downloader = ModelDownloader(progress_callback)
+        self.image_downloader = ImageDownloader(progress_callback)
         self.html_generator = HTMLGenerator()
         self.metadata_manager = MetadataManager()
+        self.progress_callback = progress_callback
+        self.status_callback = status_callback
     
     def process_model(self, model_id, version_id=None, original_url=None):
         """
