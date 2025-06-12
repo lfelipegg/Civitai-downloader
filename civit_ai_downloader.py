@@ -134,7 +134,7 @@ MODEL_TYPE_DIRS = {
 }
 
 # List of URLs to process
-URLS = [""]
+URLS = ["https://civitai.com/models/1672987/one-step-realism?modelVersionId=1893610"]
 
 # === LOGGING SETUP ===
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
