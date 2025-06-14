@@ -12,10 +12,12 @@ import sys
 import webbrowser
 from pathlib import Path
 
-from gui_components import (
+# Import from modular GUI components
+from gui import (
     ModernButton, ProgressFrame, LogFrame, 
     ModelCard, UrlInputFrame, FilterFrame
 )
+
 from download_manager_gui import GUIDownloadManager
 from metadata_manager import MetadataManager
 from config import Config
